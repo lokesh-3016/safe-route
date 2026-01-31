@@ -5,13 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SafeRoute – Smart Shelter Finder (Demo)</title>
 
-  <!-- Stop favicon 404 -->
   <link rel="icon" href="data:,">
-
-  <!-- Leaflet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
-  <!-- ✅ Better UI CSS -->
   <style>
     :root{
       --bg:#070b16;
@@ -132,7 +128,6 @@
     textarea{min-height:95px; resize:vertical}
     label{display:block; font-size:13px; color:var(--muted); margin:10px 0 6px}
 
-    /* Maps */
     #map, #mapAdmin, #mapManager{
       border-radius: var(--radius);
       overflow:hidden;
@@ -143,7 +138,6 @@
     #mapAdmin{height:360px;}
     #mapManager{height:520px;}
 
-    /* Status */
     .dot{width:10px; height:10px; border-radius:50%}
     .dot.g{background:var(--good)}
     .dot.y{background:var(--warn)}
@@ -185,7 +179,6 @@
       background: rgba(255,255,255,0.04);
     }
 
-    /* Modals */
     .hidden{display:none !important}
 
     #modalMsg, #modalSOS{
@@ -222,7 +215,6 @@
 
   <div class="container">
 
-    <!-- LOGIN -->
     <section id="screenLogin" class="card">
       <h2>SafeRoute – Demo Login</h2>
       <p class="muted">Choose a role and login. (Prototype + Firebase for SOS/messages)</p>
@@ -298,24 +290,6 @@
         <div class="card" style="flex:1.6; min-width:340px">
           <h3>Live Shelter Map (Admin View)</h3>
           <div id="mapAdmin"></div>
-          <p class="muted" style="margin:10px 0 0 0">
-            Marker colors:
-            <span class="pill"><span class="dot g"></span>Green</span>
-            <span class="pill"><span class="dot y"></span>Yellow</span>
-            <span class="pill"><span class="dot r"></span>Red</span>
-          </p>
-        </div>
-      </div>
-
-      <div class="row" style="margin-top:16px">
-        <div class="card" style="flex:1.2; min-width:340px">
-          <h3>Shelter Managers</h3>
-          <div id="adminManagersList" class="list"></div>
-        </div>
-
-        <div class="card" style="flex:2; min-width:360px">
-          <h3>Shelters (Edit Capacity / Facilities)</h3>
-          <div id="adminSheltersList" class="list"></div>
         </div>
       </div>
 
@@ -337,58 +311,12 @@
       <div class="row">
         <div class="card" style="flex:1; min-width:340px">
           <h2>Shelter Manager Dashboard</h2>
-          <p class="muted">Update only your shelter’s occupancy and resources. Admin sees updates instantly.</p>
+          <p class="muted">Update only your shelter’s occupancy and resources.</p>
 
           <div class="item">
             <div class="muted">Assigned Shelter</div>
             <div style="font-size:18px; font-weight:900" id="mgrShelterName">—</div>
             <div class="muted" id="mgrShelterMeta">—</div>
-          </div>
-
-          <div class="grid two" style="margin-top:12px">
-            <div>
-              <label>Occupied (people currently inside)</label>
-              <input id="mgrOccupied" type="number" min="0" />
-            </div>
-            <div>
-              <label>Shelter Open?</label>
-              <select id="mgrOpen">
-                <option value="true">Open</option>
-                <option value="false">Closed</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="grid three" style="margin-top:12px">
-            <div>
-              <label>Food</label>
-              <select id="mgrFood">
-                <option value="available">Available</option>
-                <option value="low">Low</option>
-                <option value="out">Out</option>
-              </select>
-            </div>
-            <div>
-              <label>Water</label>
-              <select id="mgrWater">
-                <option value="available">Available</option>
-                <option value="low">Low</option>
-                <option value="out">Out</option>
-              </select>
-            </div>
-            <div>
-              <label>Medical</label>
-              <select id="mgrMedical">
-                <option value="available">Available</option>
-                <option value="limited">Limited</option>
-                <option value="none">Not available</option>
-              </select>
-            </div>
-          </div>
-
-          <div style="display:flex; gap:10px; margin-top:12px; flex-wrap:wrap">
-            <button class="btn primary" onclick="managerSubmitUpdate()">Send Update to Admin</button>
-            <button class="btn" onclick="renderAll()">Refresh</button>
           </div>
         </div>
 
@@ -417,9 +345,6 @@
             <div class="card" style="flex:1; min-width:280px">
               <h3>Recommended Shelter ⭐</h3>
               <div id="recommendedBox" class="item"></div>
-              <p class="muted" style="margin-top:10px">
-                Offline mode uses conservative recommendation and shows last-updated timestamps.
-              </p>
             </div>
             <div class="card" style="flex:1.2; min-width:300px">
               <h3>Shelter Details</h3>
@@ -442,7 +367,6 @@
     <!-- MESSAGE MODAL -->
     <section id="modalMsg" class="hidden card">
       <h3>Send Message to Admin</h3>
-      <p class="muted">Optional: include shelter name and number of people coming.</p>
       <label>Message</label>
       <textarea id="msgText" placeholder="Example: We are 4 people, need medical support. Which shelter is safe?"></textarea>
       <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:12px">
@@ -454,7 +378,6 @@
     <!-- SOS MODAL -->
     <section id="modalSOS" class="hidden card">
       <h3>🚨 Send SOS</h3>
-      <p class="muted">This creates an SOS ticket for Admin. Your location is attached.</p>
       <label>Reason</label>
       <select id="sosReason">
         <option value="Medical emergency">Medical emergency</option>
@@ -475,7 +398,7 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <!-- ✅✅✅ FIREBASE INSERTED HERE (CORRECT PLACE) ✅✅✅ -->
+  <!-- FIREBASE -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
     import {
@@ -496,19 +419,16 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Expose for non-module scripts
     window.firebaseAPI = {
       db, collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, serverTimestamp
     };
 
     console.log("Firebase Firestore ready ✅");
+    window.dispatchEvent(new Event("firebase-ready"));
   </script>
 
-  <!-- ✅ Your JS (UPDATED to use Firestore for SOS + messages) -->
   <script>
-    /***********************
-     * DEMO DATA + STORAGE
-     ***********************/
+    // Helpers
     const LS_KEYS = {
       SHELTERS: "saferoute_shelters_v1",
       MANAGERS: "saferoute_managers_v1",
@@ -516,42 +436,27 @@
     };
 
     function nowISO(){ return new Date().toISOString(); }
-    function fmtTime(iso){ try { return new Date(iso).toLocaleString(); } catch { return iso; } }
-
-    const DEMO = {
-      shelters: [
-        { id:"S1", name:"Relief Camp – Egmore School", lat:13.0737, lng:80.2609, totalCapacity:30, occupied:18, open:true, food:"available", water:"available", medical:"limited", managerId:"M1", lastUpdated:nowISO() },
-        { id:"S2", name:"Community Hall – T. Nagar", lat:13.0418, lng:80.2337, totalCapacity:50, occupied:45, open:true, food:"low", water:"available", medical:"available", managerId:"M2", lastUpdated:nowISO() },
-        { id:"S3", name:"Govt Shelter – Marina Zone", lat:13.0483, lng:80.2824, totalCapacity:40, occupied:40, open:true, food:"available", water:"low", medical:"none", managerId:"M3", lastUpdated:nowISO() },
-        { id:"S4", name:"Temple Shelter – Kilpauk", lat:13.0795, lng:80.2430, totalCapacity:25, occupied:10, open:true, food:"available", water:"available", medical:"available", managerId:"M4", lastUpdated:nowISO() },
-      ],
-      managers: [
-        { id:"M1", username:"mgr1", password:"manager123", name:"Shelter Manager 1", shelterId:"S1", phone:"+91-90000-00001" },
-        { id:"M2", username:"mgr2", password:"manager123", name:"Shelter Manager 2", shelterId:"S2", phone:"+91-90000-00002" },
-        { id:"M3", username:"mgr3", password:"manager123", name:"Shelter Manager 3", shelterId:"S3", phone:"+91-90000-00003" },
-        { id:"M4", username:"mgr4", password:"manager123", name:"Shelter Manager 4", shelterId:"S4", phone:"+91-90000-00004" },
-      ]
-    };
-
-    function loadOrInit(){
-      if (!localStorage.getItem(LS_KEYS.SHELTERS)) localStorage.setItem(LS_KEYS.SHELTERS, JSON.stringify(DEMO.shelters));
-      if (!localStorage.getItem(LS_KEYS.MANAGERS)) localStorage.setItem(LS_KEYS.MANAGERS, JSON.stringify(DEMO.managers));
+    function escapeHTML(str){
+      return String(str)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
     }
 
-    function resetDemo(){
-      localStorage.setItem(LS_KEYS.SHELTERS, JSON.stringify(DEMO.shelters));
-      localStorage.setItem(LS_KEYS.MANAGERS, JSON.stringify(DEMO.managers));
-      alert("Demo data reset ✅");
-      renderAll();
+    function getSession(){ return JSON.parse(localStorage.getItem(LS_KEYS.SESSION)||"null"); }
+    function setSession(s){ localStorage.setItem(LS_KEYS.SESSION, JSON.stringify(s)); }
+
+    // ✅ Wait for firebase before allowing send
+    function waitForFirebase(){
+      return new Promise((resolve) => {
+        if (window.firebaseAPI) return resolve();
+        window.addEventListener("firebase-ready", () => resolve(), { once: true });
+      });
     }
 
-    function getShelters(){ return JSON.parse(localStorage.getItem(LS_KEYS.SHELTERS)||"[]"); }
-    function setShelters(a){ localStorage.setItem(LS_KEYS.SHELTERS, JSON.stringify(a)); }
-    function getManagers(){ return JSON.parse(localStorage.getItem(LS_KEYS.MANAGERS)||"[]"); }
-
-    /***********************
-     * FIRESTORE LIVE DATA (Messages + SOS)
-     ***********************/
+    // Live data
     let LIVE_MESSAGES = [];
     let LIVE_SOS = [];
     let unsubMsg = null;
@@ -564,17 +469,23 @@
       if (unsubMsg) unsubMsg();
       if (unsubSOS) unsubSOS();
 
-      const qMsg = api.query(api.collection(api.db, "messages"), api.orderBy("createdAt", "desc"));
-      unsubMsg = api.onSnapshot(qMsg, (snap) => {
-        LIVE_MESSAGES = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
-        renderAll();
-      });
+      unsubMsg = api.onSnapshot(
+        api.query(api.collection(api.db, "messages"), api.orderBy("createdAt", "desc")),
+        (snap) => {
+          LIVE_MESSAGES = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
+          renderAll();
+        },
+        (err) => console.error("Messages listener error:", err)
+      );
 
-      const qSOS = api.query(api.collection(api.db, "sos"), api.orderBy("createdAt", "desc"));
-      unsubSOS = api.onSnapshot(qSOS, (snap) => {
-        LIVE_SOS = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
-        renderAll();
-      });
+      unsubSOS = api.onSnapshot(
+        api.query(api.collection(api.db, "sos"), api.orderBy("createdAt", "desc")),
+        (snap) => {
+          LIVE_SOS = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
+          renderAll();
+        },
+        (err) => console.error("SOS listener error:", err)
+      );
     }
 
     function stopLiveFirestore(){
@@ -582,282 +493,21 @@
       if (unsubSOS) { unsubSOS(); unsubSOS = null; }
     }
 
-    /***********************
-     * STATUS LOGIC
-     ***********************/
-    function computeStatus(s){
-      const total = s.totalCapacity;
-      const available = Math.max(0, total - s.occupied);
-      const buffer = Math.max(5, Math.ceil(total * 0.2));
-
-      if (!s.open) return { code:"RED", label:"Closed", available, buffer };
-      if (available <= 0) return { code:"RED", label:"Full", available, buffer };
-      if (available <= buffer) return { code:"YELLOW", label:"Limited", available, buffer };
-      return { code:"GREEN", label:"Available", available, buffer };
-    }
-
-    function statusTagHTML(st){
-      if (st.code==="GREEN") return `<span class="statusTag tagG"><span class="dot g"></span>${st.label}</span>`;
-      if (st.code==="YELLOW") return `<span class="statusTag tagY"><span class="dot y"></span>${st.label}</span>`;
-      return `<span class="statusTag tagR"><span class="dot r"></span>${st.label}</span>`;
-    }
-
-    /***********************
-     * SESSION + LOGIN
-     ***********************/
-    function getSession(){ return JSON.parse(localStorage.getItem(LS_KEYS.SESSION)||"null"); }
-    function setSession(s){ localStorage.setItem(LS_KEYS.SESSION, JSON.stringify(s)); }
-    function logout(){
-      stopLiveFirestore();
-      localStorage.removeItem(LS_KEYS.SESSION);
-      showScreen("login");
-    }
-
-    function handleLogin(){
-      const role=document.getElementById("loginRole").value;
-      const user=(document.getElementById("loginUser").value||"").trim();
-      const pass=(document.getElementById("loginPass").value||"").trim();
-      if (!user || !pass) return alert("Enter username and password");
-
-      if (role==="admin"){
-        if (user==="admin" && pass==="admin123"){ setSession({role:"admin", username:user}); return showScreen("admin"); }
-        return alert("Invalid admin credentials");
-      }
-      if (role==="manager"){
-        const mgr=getManagers().find(m=>m.username===user && m.password===pass);
-        if (!mgr) return alert("Invalid manager credentials");
-        setSession({role:"manager", username:user, managerId:mgr.id});
-        return showScreen("manager");
-      }
-      if (role==="user"){
-        if (pass!=="user123") return alert("Invalid user password (demo: user123)");
-        setSession({role:"user", username:user});
-        return showScreen("user");
-      }
-    }
-
-    /***********************
-     * ONLINE/OFFLINE PILL
-     ***********************/
-    function updateNetworkPill(){
-      const pill=document.getElementById("netPill");
-      const online=navigator.onLine;
-      pill.textContent = online ? "Online: Live updates possible" : "Offline: Showing last-known data";
-      pill.style.borderColor = online ? "rgba(46,204,113,0.35)" : "rgba(241,196,15,0.35)";
-    }
-    window.addEventListener("online", updateNetworkPill);
-    window.addEventListener("offline", updateNetworkPill);
-
-    /***********************
-     * MAPS
-     ***********************/
-    let userMap, adminMap, managerMap;
-    let userMarker=null;
-    let selectedShelterId=null;
-
-    function markerColor(code){
-      if (code==="GREEN") return "#2ecc71";
-      if (code==="YELLOW") return "#f1c40f";
-      return "#ff4d4d";
-    }
-
-    function initUserMap(){
-      if (userMap) return;
-      userMap = L.map("map").setView([13.0827, 80.2707], 12);
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19, attribution:"© OpenStreetMap contributors"}).addTo(userMap);
-
-      if (navigator.geolocation){
-        navigator.geolocation.getCurrentPosition(
-          (pos)=>{
-            const lat=pos.coords.latitude, lng=pos.coords.longitude;
-            userMap.setView([lat,lng],13);
-            if (userMarker) userMap.removeLayer(userMarker);
-            userMarker=L.marker([lat,lng]).addTo(userMap).bindPopup("📍 You are here").openPopup();
-            renderUserSheltersOnMap();
-          },
-          ()=>renderUserSheltersOnMap(),
-          { enableHighAccuracy:true, timeout:6000 }
-        );
-      } else renderUserSheltersOnMap();
-    }
-
-    function renderUserSheltersOnMap(){
-      if (!userMap) return;
-
-      userMap.eachLayer(layer=>{ if (layer instanceof L.CircleMarker) userMap.removeLayer(layer); });
-
-      const shelters=getShelters();
-      shelters.forEach(s=>{
-        const st=computeStatus(s);
-        const color=markerColor(st.code);
-        const cm=L.circleMarker([s.lat,s.lng],{radius:10,color,fillColor:color,fillOpacity:0.85}).addTo(userMap);
-
-        cm.on("click", ()=>{ selectedShelterId=s.id; renderSelectedShelterDetails(); });
-
-        cm.bindPopup(`
-          <b>${escapeHTML(s.name)}</b><br/>
-          ${st.label} | Available: ${st.available}/${s.totalCapacity}<br/>
-          Food: ${s.food} | Water: ${s.water} | Medical: ${s.medical}<br/>
-          <small>Last updated: ${fmtTime(s.lastUpdated)}</small>
-        `);
-      });
-
-      renderRecommendation();
-    }
-
-    function initAdminMap(){
-      if (adminMap) return;
-      adminMap = L.map("mapAdmin").setView([13.0827, 80.2707], 12);
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19, attribution:"© OpenStreetMap contributors"}).addTo(adminMap);
-      renderAdminMapMarkers();
-    }
-
-    function renderAdminMapMarkers(){
-      if (!adminMap) return;
-      adminMap.eachLayer(layer=>{ if (layer instanceof L.CircleMarker) adminMap.removeLayer(layer); });
-
-      getShelters().forEach(s=>{
-        const st=computeStatus(s);
-        const color=markerColor(st.code);
-        L.circleMarker([s.lat,s.lng],{radius:10,color,fillColor:color,fillOpacity:0.85}).addTo(adminMap)
-          .bindPopup(`
-            <b>${escapeHTML(s.name)}</b><br/>
-            ${st.label} | Available: ${st.available}/${s.totalCapacity}<br/>
-            <small>Last updated: ${fmtTime(s.lastUpdated)}</small>
-          `);
-      });
-    }
-
-    function initManagerMap(){
-      if (managerMap) return;
-      managerMap = L.map("mapManager").setView([13.0827, 80.2707], 12);
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19, attribution:"© OpenStreetMap contributors"}).addTo(managerMap);
-      renderManagerMap();
-    }
-
-    function renderManagerMap(){
-      if (!managerMap) return;
-      managerMap.eachLayer(layer=>{ if (layer instanceof L.CircleMarker || layer instanceof L.Marker) managerMap.removeLayer(layer); });
-
-      const sess=getSession();
-      const mgr=getManagers().find(m=>m.id===sess?.managerId);
-      const sh=getShelters().find(s=>s.id===mgr?.shelterId);
-      if (!sh) return;
-
-      const st=computeStatus(sh);
-      const color=markerColor(st.code);
-
-      managerMap.setView([sh.lat, sh.lng], 14);
-
-      L.circleMarker([sh.lat,sh.lng],{radius:12,color,fillColor:color,fillOpacity:0.9}).addTo(managerMap)
-        .bindPopup(`<b>${escapeHTML(sh.name)}</b><br/>${st.label} | Available: ${st.available}/${sh.totalCapacity}<br/><small>${fmtTime(sh.lastUpdated)}</small>`)
-        .openPopup();
-    }
-
-    /***********************
-     * RECOMMENDATION
-     ***********************/
-    function facilityScore(s){
-      let sc=0;
-      if (s.food==="available") sc+=1;
-      if (s.water==="available") sc+=1;
-      if (s.medical==="available") sc+=2;
-      if (s.medical==="limited") sc+=1;
-      return sc;
-    }
-    function distanceKm(aLat,aLng,bLat,bLng){
-      const R=6371;
-      const dLat=(bLat-aLat)*Math.PI/180;
-      const dLng=(bLng-aLng)*Math.PI/180;
-      const sa=Math.sin(dLat/2)**2 + Math.cos(aLat*Math.PI/180)*Math.cos(bLat*Math.PI/180)*Math.sin(dLng/2)**2;
-      return 2*R*Math.atan2(Math.sqrt(sa),Math.sqrt(1-sa));
-    }
-    function getUserLatLng(){
-      if (userMarker){ const ll=userMarker.getLatLng(); return {lat:ll.lat, lng:ll.lng}; }
-      return { lat:13.0827, lng:80.2707 };
-    }
-
-    function renderRecommendation(){
-      const box=document.getElementById("recommendedBox");
-      const shelters=getShelters();
-      const online=navigator.onLine;
-      const userLL=getUserLatLng();
-
-      const scored=shelters.map(s=>{
-        const st=computeStatus(s);
-        const d=distanceKm(userLL.lat,userLL.lng,s.lat,s.lng);
-        const fac=facilityScore(s);
-        const available=st.available;
-
-        let eligible = (st.code==="GREEN");
-        if (online) eligible = (st.code==="GREEN" || st.code==="YELLOW");
-
-        const score =
-          (100 - Math.min(d*10,100))*0.45 +
-          Math.min((available/s.totalCapacity)*100,100)*0.35 +
-          (fac*10)*0.20;
-
-        return {s,st,d,score,eligible};
-      });
-
-      const best=scored.filter(x=>x.eligible && x.st.code!=="RED").sort((a,b)=>b.score-a.score)[0];
-      if (!best){
-        box.innerHTML = `<b>No safe recommendation right now</b><br/><span class="muted">Try messaging admin or use SOS.</span>`;
-        return;
-      }
-
-      box.innerHTML=`
-        <div class="itemHead">
-          <div><b>${escapeHTML(best.s.name)}</b><br/>${statusTagHTML(best.st)}</div>
-          <div class="muted mono">${best.d.toFixed(2)} km</div>
-        </div>
-        <div class="muted" style="margin-top:8px">
-          Available: <b>${best.st.available}</b> / ${best.s.totalCapacity}<br/>
-          Food(${best.s.food}) Water(${best.s.water}) Medical(${best.s.medical})<br/>
-          <small>Last updated: ${fmtTime(best.s.lastUpdated)}</small><br/>
-          <small>${online ? "Online mode." : "Offline conservative mode."}</small>
-        </div>
-      `;
-    }
-
-    /***********************
-     * USER DETAILS
-     ***********************/
-    function renderSelectedShelterDetails(){
-      const box=document.getElementById("shelterDetails");
-      if (!selectedShelterId){
-        box.classList.add("muted");
-        box.textContent="Click a shelter marker to view details.";
-        return;
-      }
-      const s=getShelters().find(x=>x.id===selectedShelterId);
-      if (!s) return;
-      const st=computeStatus(s);
-      box.classList.remove("muted");
-      box.innerHTML=`
-        <div class="itemHead">
-          <div><b>${escapeHTML(s.name)}</b><br/>${statusTagHTML(st)}</div>
-          <div class="muted mono">ID:${s.id}</div>
-        </div>
-        <div style="margin-top:8px">
-          Available: <b>${st.available}</b> / ${s.totalCapacity}<br/>
-          Occupied: <b>${s.occupied}</b><br/>
-          Food: <b>${s.food}</b> | Water: <b>${s.water}</b> | Medical: <b>${s.medical}</b><br/>
-          <span class="muted"><small>Last updated: ${fmtTime(s.lastUpdated)}</small></span><br/>
-          <span class="muted"><small>${navigator.onLine ? "" : "Offline: availability may have changed."}</small></span>
-        </div>
-      `;
-    }
-
-    /***********************
-     * USER: MESSAGE + SOS (FIRESTORE)
-     ***********************/
+    // UI actions
     function openMessageModal(){ document.getElementById("modalMsg").classList.remove("hidden"); }
     function closeMessageModal(){ document.getElementById("modalMsg").classList.add("hidden"); document.getElementById("msgText").value=""; }
+    function openSOSModal(){ document.getElementById("modalSOS").classList.remove("hidden"); }
+    function closeSOSModal(){ document.getElementById("modalSOS").classList.add("hidden"); document.getElementById("sosMsg").value=""; }
 
+    // Dummy location
+    function getUserLatLng(){
+      return { lat: 13.0827, lng: 80.2707 };
+    }
+
+    // ✅ SEND MESSAGE (Firestore)
     async function sendMessageToAdmin(){
+      await waitForFirebase();
       const api = window.firebaseAPI;
-      if (!api) return alert("Firebase not ready. Refresh page.");
 
       const sess=getSession();
       const text=(document.getElementById("msgText").value||"").trim();
@@ -867,7 +517,6 @@
         await api.addDoc(api.collection(api.db, "messages"), {
           fromUser: sess.username,
           text,
-          shelterId: selectedShelterId || null,
           time: nowISO(),
           replyText: null,
           replyTime: null,
@@ -876,11 +525,42 @@
         closeMessageModal();
         alert("Message sent ✅");
       }catch(e){
-        console.error(e);
+        console.error("Message send error:", e);
         alert("Message failed. Check Firestore Rules.");
       }
     }
 
+    // ✅ SEND SOS (Firestore)
+    async function sendSOS(){
+      await waitForFirebase();
+      const api = window.firebaseAPI;
+
+      const sess=getSession();
+      const reason=document.getElementById("sosReason").value;
+      const message=(document.getElementById("sosMsg").value||"").trim();
+      const ll=getUserLatLng();
+
+      try{
+        await api.addDoc(api.collection(api.db, "sos"), {
+          fromUser: sess.username,
+          reason, message,
+          lat: ll.lat, lng: ll.lng,
+          status: "Sent",
+          time: nowISO(),
+          createdAt: api.serverTimestamp(),
+          adminResponse: null,
+          adminResponseTime: null
+        });
+
+        closeSOSModal();
+        alert("SOS sent ✅");
+      }catch(e){
+        console.error("SOS send error:", e);
+        alert("SOS failed. Check Firestore Rules.");
+      }
+    }
+
+    // Render messages
     function renderUserThread(){
       const sess=getSession();
       const box=document.getElementById("userMsgThread");
@@ -898,356 +578,70 @@
       `).join("");
     }
 
-    function openSOSModal(){ document.getElementById("modalSOS").classList.remove("hidden"); }
-    function closeSOSModal(){ document.getElementById("modalSOS").classList.add("hidden"); document.getElementById("sosMsg").value=""; }
-
-    async function sendSOS(){
-      const api = window.firebaseAPI;
-      if (!api) return alert("Firebase not ready. Refresh page.");
-
-      const sess=getSession();
-      const reason=document.getElementById("sosReason").value;
-      const message=(document.getElementById("sosMsg").value||"").trim();
-      const ll=getUserLatLng();
-
-      try{
-        await api.addDoc(api.collection(api.db, "sos"), {
-          fromUser: sess.username,
-          reason, message,
-          lat: ll.lat, lng: ll.lng,
-          status: "Sent",
-          time: nowISO(),
-          adminResponse: null,
-          adminResponseTime: null,
-          createdAt: api.serverTimestamp()
-        });
-
-        closeSOSModal();
-        alert("SOS sent ✅");
-      }catch(e){
-        console.error(e);
-        alert("SOS failed. Check Firestore Rules.");
-      }
-    }
-
-    /***********************
-     * ADMIN: MESSAGES (FIRESTORE)
-     ***********************/
     function renderAdminMessages(){
       const box=document.getElementById("adminMessagesList");
-      const shelters=getShelters();
       const all = LIVE_MESSAGES;
-
       if (all.length===0){ box.innerHTML=`<div class="muted">No messages yet.</div>`; return; }
 
-      box.innerHTML = all.map(m=>{
-        const sh = m.shelterId ? shelters.find(s=>s.id===m.shelterId) : null;
-        return `
-          <div class="item">
-            <div class="itemHead">
-              <div>
-                <b>${escapeHTML(m.fromUser || "")}</b>
-                <div class="muted"><small>${escapeHTML(m.time || "")}</small></div>
-              </div>
-              <div class="muted">${sh ? "Shelter: "+escapeHTML(sh.name) : ""}</div>
-            </div>
-
-            <div style="margin-top:6px">${escapeHTML(m.text || "")}</div>
-
-            ${m.replyText ? `
-              <div class="reply">
-                <b>Replied:</b> ${escapeHTML(m.replyText)}<br/>
-                <span class="muted"><small>${escapeHTML(m.replyTime || "")}</small></span>
-              </div>
-            ` : `
-              <label style="margin-top:10px">Reply</label>
-              <textarea id="reply_${m.docId}" placeholder="Type reply..."></textarea>
-              <div style="display:flex; justify-content:flex-end; margin-top:8px">
-                <button class="btn primary small" onclick="adminReply('${m.docId}')">Send Reply</button>
-              </div>
-            `}
-          </div>
-        `;
-      }).join("");
+      box.innerHTML = all.map(m=>`
+        <div class="item">
+          <b>${escapeHTML(m.fromUser || "")}</b>
+          <div class="muted"><small>${escapeHTML(m.time || "")}</small></div>
+          <div style="margin-top:6px">${escapeHTML(m.text || "")}</div>
+        </div>
+      `).join("");
     }
 
-    async function adminReply(docId){
-      const api = window.firebaseAPI;
-      const text=(document.getElementById("reply_"+docId).value||"").trim();
-      if (!text) return alert("Enter reply");
-      try{
-        await api.updateDoc(api.doc(api.db, "messages", docId), {
-          replyText: text,
-          replyTime: nowISO()
-        });
-        alert("Reply sent ✅");
-      }catch(e){
-        console.error(e);
-        alert("Reply failed. Check Firestore Rules.");
-      }
-    }
-
-    /***********************
-     * ADMIN: SOS (FIRESTORE)
-     ***********************/
     function renderAdminSOS(){
       const box=document.getElementById("adminSOSList");
       const all = LIVE_SOS;
-      const openCount=all.filter(x=>x.status!=="Resolved").length;
-      document.getElementById("adminOpenSOS").textContent=openCount;
+      document.getElementById("adminOpenSOS").textContent = all.filter(x=>x.status!=="Resolved").length;
 
       if (all.length===0){ box.innerHTML=`<div class="muted">No SOS alerts yet.</div>`; return; }
 
       box.innerHTML = all.map(t=>`
         <div class="item">
-          <div class="itemHead">
-            <div>
-              <b>${escapeHTML(t.fromUser || "")}</b> – <span class="muted">${escapeHTML(t.reason || "")}</span>
-              <div class="muted"><small>${escapeHTML(t.time || "")}</small></div>
-            </div>
-            <div class="statusTag ${t.status==="Resolved"?"tagG":(t.status==="Acknowledged"?"tagY":"tagR")}">${escapeHTML(t.status || "")}</div>
-          </div>
-
-          <div style="margin-top:6px">
-            <div class="muted"><small>Location:</small> <span class="mono">${Number(t.lat||0).toFixed(5)}, ${Number(t.lng||0).toFixed(5)}</span></div>
-            <div style="margin-top:6px">${escapeHTML(t.message || "(no message)")}</div>
-          </div>
-
-          ${t.adminResponse ? `
-            <div class="reply">
-              <b>Admin response:</b> ${escapeHTML(t.adminResponse)}<br/>
-              <span class="muted"><small>${escapeHTML(t.adminResponseTime || "")}</small></span>
-            </div>
-          ` : `
-            <label style="margin-top:10px">Respond</label>
-            <textarea id="sosreply_${t.docId}" placeholder="Example: Stay calm. Nearest shelter is Egmore School."></textarea>
-            <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:8px; flex-wrap:wrap">
-              <button class="btn small" onclick="adminAcknowledgeSOS('${t.docId}')">Acknowledge</button>
-              <button class="btn primary small" onclick="adminRespondSOS('${t.docId}')">Send Response</button>
-              <button class="btn good small" onclick="adminResolveSOS('${t.docId}')">Mark Resolved</button>
-            </div>
-          `}
+          <b>${escapeHTML(t.fromUser || "")}</b> – <span class="muted">${escapeHTML(t.reason || "")}</span>
+          <div class="muted"><small>${escapeHTML(t.time || "")}</small></div>
+          <div style="margin-top:6px">${escapeHTML(t.message || "(no message)")}</div>
+          <div class="muted mono" style="margin-top:6px">${Number(t.lat||0).toFixed(5)}, ${Number(t.lng||0).toFixed(5)}</div>
         </div>
       `).join("");
     }
 
-    async function adminAcknowledgeSOS(docId){
-      const api = window.firebaseAPI;
-      try{
-        await api.updateDoc(api.doc(api.db, "sos", docId), { status:"Acknowledged" });
-      }catch(e){
-        console.error(e);
-        alert("Failed. Check Firestore Rules.");
+    // Minimal routing (kept simple)
+    function logout(){
+      stopLiveFirestore();
+      localStorage.removeItem(LS_KEYS.SESSION);
+      showScreen("login");
+    }
+
+    function handleLogin(){
+      const role=document.getElementById("loginRole").value;
+      const user=(document.getElementById("loginUser").value||"").trim();
+      const pass=(document.getElementById("loginPass").value||"").trim();
+      if (!user || !pass) return alert("Enter username and password");
+
+      if (role==="admin"){
+        if (user==="admin" && pass==="admin123"){ setSession({role:"admin", username:user}); return showScreen("admin"); }
+        return alert("Invalid admin credentials");
       }
-    }
-    async function adminRespondSOS(docId){
-      const api = window.firebaseAPI;
-      const text=(document.getElementById("sosreply_"+docId).value||"").trim();
-      if (!text) return alert("Enter SOS response");
-      try{
-        await api.updateDoc(api.doc(api.db, "sos", docId), {
-          adminResponse:text,
-          adminResponseTime: nowISO(),
-          status:"Acknowledged"
-        });
-        alert("SOS response sent ✅");
-      }catch(e){
-        console.error(e);
-        alert("Failed. Check Firestore Rules.");
+      if (role==="user"){
+        if (pass!=="user123") return alert("Invalid user password (demo: user123)");
+        setSession({role:"user", username:user});
+        return showScreen("user");
       }
-    }
-    async function adminResolveSOS(docId){
-      const api = window.firebaseAPI;
-      try{
-        await api.updateDoc(api.doc(api.db, "sos", docId), { status:"Resolved" });
-      }catch(e){
-        console.error(e);
-        alert("Failed. Check Firestore Rules.");
-      }
+      alert("Manager screen removed in this minimal Firestore demo. Use admin/user.");
     }
 
-    /***********************
-     * ADMIN: SHELTERS (LOCAL)
-     ***********************/
-    function opt(current, arr){
-      return arr.map(v=>`<option value="${v}" ${v===current?"selected":""}>${v}</option>`).join("");
-    }
-
-    function renderAdminManagers(){
-      const box=document.getElementById("adminManagersList");
-      const mgrs=getManagers();
-      const shelters=getShelters();
-
-      box.innerHTML = mgrs.map(m=>{
-        const sh=shelters.find(s=>s.id===m.shelterId);
-        return `
-          <div class="item">
-            <div class="itemHead">
-              <div><b>${escapeHTML(m.name)}</b><div class="muted mono">${escapeHTML(m.username)}</div></div>
-              <div class="muted">${escapeHTML(m.phone)}</div>
-            </div>
-            <div class="muted" style="margin-top:6px">Assigned: <b>${sh?escapeHTML(sh.name):"—"}</b></div>
-          </div>
-        `;
-      }).join("");
-    }
-
-    function renderAdminShelters(){
-      const box=document.getElementById("adminSheltersList");
-      const shelters=getShelters();
-      document.getElementById("adminTotalShelters").textContent = shelters.length;
-
-      box.innerHTML = shelters.map(s=>{
-        const st=computeStatus(s);
-        return `
-          <div class="item">
-            <div class="itemHead">
-              <div>
-                <b>${escapeHTML(s.name)}</b><br/>
-                ${statusTagHTML(st)} <span class="muted"><small>(Avail: ${st.available}/${s.totalCapacity}, buffer:${st.buffer})</small></span>
-              </div>
-              <div class="muted"><small>Updated: ${fmtTime(s.lastUpdated)}</small></div>
-            </div>
-
-            <div class="grid three" style="margin-top:10px">
-              <div>
-                <label>Occupied</label>
-                <input type="number" min="0" value="${s.occupied}" id="occ_${s.id}">
-              </div>
-              <div>
-                <label>Open?</label>
-                <select id="open_${s.id}">
-                  <option value="true" ${s.open?"selected":""}>Open</option>
-                  <option value="false" ${!s.open?"selected":""}>Closed</option>
-                </select>
-              </div>
-              <div>
-                <label>Total Capacity</label>
-                <input type="number" min="1" value="${s.totalCapacity}" id="tot_${s.id}">
-              </div>
-            </div>
-
-            <div class="grid three" style="margin-top:10px">
-              <div>
-                <label>Food</label>
-                <select id="food_${s.id}">
-                  ${opt(s.food, ["available","low","out"])}
-                </select>
-              </div>
-              <div>
-                <label>Water</label>
-                <select id="water_${s.id}">
-                  ${opt(s.water, ["available","low","out"])}
-                </select>
-              </div>
-              <div>
-                <label>Medical</label>
-                <select id="medical_${s.id}">
-                  ${opt(s.medical, ["available","limited","none"])}
-                </select>
-              </div>
-            </div>
-
-            <div style="display:flex; gap:10px; margin-top:12px; flex-wrap:wrap">
-              <button class="btn primary small" onclick="adminSaveShelter('${s.id}')">Save Changes</button>
-              <button class="btn small" onclick="adminZoomShelter('${s.id}')">Zoom on Map</button>
-            </div>
-          </div>
-        `;
-      }).join("");
-    }
-
-    function adminSaveShelter(id){
-      const shelters=getShelters();
-      const s=shelters.find(x=>x.id===id);
-      if (!s) return;
-
-      const occ=Number(document.getElementById("occ_"+id).value);
-      const tot=Number(document.getElementById("tot_"+id).value);
-      const open=document.getElementById("open_"+id).value==="true";
-      const food=document.getElementById("food_"+id).value;
-      const water=document.getElementById("water_"+id).value;
-      const medical=document.getElementById("medical_"+id).value;
-
-      if (!Number.isFinite(occ) || occ<0) return alert("Occupied must be >= 0");
-      if (!Number.isFinite(tot) || tot<=0) return alert("Total capacity must be > 0");
-      if (occ>tot) return alert("Occupied cannot exceed total capacity");
-
-      s.occupied=occ; s.totalCapacity=tot; s.open=open;
-      s.food=food; s.water=water; s.medical=medical;
-      s.lastUpdated=nowISO();
-
-      setShelters(shelters);
-      renderAll();
-      alert("Shelter updated ✅");
-    }
-
-    function adminZoomShelter(id){
-      const s=getShelters().find(x=>x.id===id);
-      if (!s || !adminMap) return;
-      adminMap.setView([s.lat,s.lng],15);
-    }
-
-    /***********************
-     * MANAGER
-     ***********************/
-    function renderManagerScreen(){
-      const sess=getSession();
-      const mgr=getManagers().find(m=>m.id===sess?.managerId);
-      const sh=getShelters().find(s=>s.id===mgr?.shelterId);
-      if (!mgr || !sh) return;
-
-      const st=computeStatus(sh);
-      document.getElementById("mgrShelterName").textContent=sh.name;
-      document.getElementById("mgrShelterMeta").innerHTML =
-        `${statusTagHTML(st)} <span class="muted">Avail: ${st.available}/${sh.totalCapacity} | Updated: ${fmtTime(sh.lastUpdated)}</span>`;
-
-      document.getElementById("mgrOccupied").value=sh.occupied;
-      document.getElementById("mgrOpen").value=String(sh.open);
-      document.getElementById("mgrFood").value=sh.food;
-      document.getElementById("mgrWater").value=sh.water;
-      document.getElementById("mgrMedical").value=sh.medical;
-
-      initManagerMap();
-      renderManagerMap();
-    }
-
-    function managerSubmitUpdate(){
-      const sess=getSession();
-      const mgr=getManagers().find(m=>m.id===sess?.managerId);
-      const shelters=getShelters();
-      const sh=shelters.find(s=>s.id===mgr?.shelterId);
-      if (!sh) return;
-
-      const occ=Number(document.getElementById("mgrOccupied").value);
-      if (!Number.isFinite(occ) || occ<0) return alert("Occupied must be >= 0");
-      if (occ>sh.totalCapacity) return alert("Occupied cannot exceed total capacity");
-
-      sh.occupied=occ;
-      sh.open=document.getElementById("mgrOpen").value==="true";
-      sh.food=document.getElementById("mgrFood").value;
-      sh.water=document.getElementById("mgrWater").value;
-      sh.medical=document.getElementById("mgrMedical").value;
-      sh.lastUpdated=nowISO();
-
-      setShelters(shelters);
-      renderAll();
-      alert("Update sent to Admin ✅");
-    }
-
-    /***********************
-     * SCREEN ROUTING
-     ***********************/
     function showScreen(which){
       const topbar=document.getElementById("topbar");
       const login=document.getElementById("screenLogin");
       const admin=document.getElementById("screenAdmin");
-      const manager=document.getElementById("screenManager");
       const user=document.getElementById("screenUser");
 
       login.classList.add("hidden");
       admin.classList.add("hidden");
-      manager.classList.add("hidden");
       user.classList.add("hidden");
 
       if (which==="login"){
@@ -1257,29 +651,17 @@
       }
 
       topbar.classList.remove("hidden");
-      updateNetworkPill();
-
       const sess=getSession();
       document.getElementById("whoamiPill").textContent = `${sess.role.toUpperCase()} · ${sess.username}`;
+      document.getElementById("netPill").textContent = navigator.onLine ? "Online" : "Offline";
 
-      // Start Firestore only for admin & user (they need live messages)
-      if (sess.role === "admin" || sess.role === "user") startLiveFirestore();
-      else stopLiveFirestore();
+      // Start listeners for admin/user
+      startLiveFirestore();
 
-      if (which==="admin"){
-        admin.classList.remove("hidden");
-        initAdminMap();
-        renderAll();
-      }
-      if (which==="manager"){
-        manager.classList.remove("hidden");
-        renderManagerScreen();
-      }
-      if (which==="user"){
-        user.classList.remove("hidden");
-        initUserMap();
-        renderAll();
-      }
+      if (which==="admin") admin.classList.remove("hidden");
+      if (which==="user") user.classList.remove("hidden");
+
+      renderAll();
     }
 
     function renderAll(){
@@ -1287,35 +669,15 @@
       if (!sess) return;
 
       if (sess.role==="admin"){
-        renderAdminManagers();
-        renderAdminShelters();
         renderAdminMessages();
         renderAdminSOS();
-        renderAdminMapMarkers();
-      }
-      if (sess.role==="manager"){
-        renderManagerScreen();
       }
       if (sess.role==="user"){
-        renderUserSheltersOnMap();
-        renderSelectedShelterDetails();
         renderUserThread();
       }
     }
 
-    function escapeHTML(str){
-      return String(str)
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
-    }
-
-    /***********************
-     * STARTUP
-     ***********************/
-    loadOrInit();
+    // Startup
     const sess=getSession();
     if (!sess) showScreen("login");
     else showScreen(sess.role);
