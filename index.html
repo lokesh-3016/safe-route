@@ -225,7 +225,7 @@
     <!-- LOGIN -->
     <section id="screenLogin" class="card">
       <h2>SafeRoute – Demo Login</h2>
-      <p class="muted">Choose a role and login. (Prototype: localStorage, no backend needed)</p>
+      <p class="muted">Choose a role and login. (Prototype + Firebase for SOS/messages)</p>
 
       <div class="grid two">
         <div>
@@ -269,9 +269,6 @@
             <div class="muted mono">password: user123</div>
           </div>
         </div>
-        <p class="muted" style="margin-top:10px">
-          Tip: Login as Admin → update capacity to make a shelter Full → switch to User to see colors change.
-        </p>
       </div>
     </section>
 
@@ -294,7 +291,7 @@
           </div>
 
           <div style="margin-top:12px" class="sosBanner">
-            <b>Quick Note:</b> Admin receives capacity updates from Shelter Managers, and can reply to User messages & SOS.
+            <b>Quick Note:</b> Admin sees SOS + messages from other phones using Firebase Firestore.
           </div>
         </div>
 
@@ -457,7 +454,7 @@
     <!-- SOS MODAL -->
     <section id="modalSOS" class="hidden card">
       <h3>🚨 Send SOS</h3>
-      <p class="muted">This creates an SOS ticket for Admin (demo). Your location is attached.</p>
+      <p class="muted">This creates an SOS ticket for Admin. Your location is attached.</p>
       <label>Reason</label>
       <select id="sosReason">
         <option value="Medical emergency">Medical emergency</option>
@@ -478,7 +475,36 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <!-- ✅ Your JS (Working) -->
+  <!-- ✅✅✅ FIREBASE INSERTED HERE (CORRECT PLACE) ✅✅✅ -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+    import {
+      getFirestore, collection, addDoc, query, orderBy,
+      onSnapshot, doc, updateDoc, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBGUKzQ29AvMQ62U9WCVllyp-TRTZI6iL0",
+      authDomain: "saferoute-sos-6f496.firebaseapp.com",
+      projectId: "saferoute-sos-6f496",
+      storageBucket: "saferoute-sos-6f496.firebasestorage.app",
+      messagingSenderId: "108804434955",
+      appId: "1:108804434955:web:22e72c60f8d7bb6a506b0e",
+      measurementId: "G-D382R4SV8B"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Expose for non-module scripts
+    window.firebaseAPI = {
+      db, collection, addDoc, query, orderBy, onSnapshot, doc, updateDoc, serverTimestamp
+    };
+
+    console.log("Firebase Firestore ready ✅");
+  </script>
+
+  <!-- ✅ Your JS (UPDATED to use Firestore for SOS + messages) -->
   <script>
     /***********************
      * DEMO DATA + STORAGE
@@ -486,8 +512,6 @@
     const LS_KEYS = {
       SHELTERS: "saferoute_shelters_v1",
       MANAGERS: "saferoute_managers_v1",
-      MESSAGES: "saferoute_messages_v1",
-      SOS: "saferoute_sos_v1",
       SESSION: "saferoute_session_v1"
     };
 
@@ -512,15 +536,11 @@
     function loadOrInit(){
       if (!localStorage.getItem(LS_KEYS.SHELTERS)) localStorage.setItem(LS_KEYS.SHELTERS, JSON.stringify(DEMO.shelters));
       if (!localStorage.getItem(LS_KEYS.MANAGERS)) localStorage.setItem(LS_KEYS.MANAGERS, JSON.stringify(DEMO.managers));
-      if (!localStorage.getItem(LS_KEYS.MESSAGES)) localStorage.setItem(LS_KEYS.MESSAGES, JSON.stringify([]));
-      if (!localStorage.getItem(LS_KEYS.SOS)) localStorage.setItem(LS_KEYS.SOS, JSON.stringify([]));
     }
 
     function resetDemo(){
       localStorage.setItem(LS_KEYS.SHELTERS, JSON.stringify(DEMO.shelters));
       localStorage.setItem(LS_KEYS.MANAGERS, JSON.stringify(DEMO.managers));
-      localStorage.setItem(LS_KEYS.MESSAGES, JSON.stringify([]));
-      localStorage.setItem(LS_KEYS.SOS, JSON.stringify([]));
       alert("Demo data reset ✅");
       renderAll();
     }
@@ -528,10 +548,39 @@
     function getShelters(){ return JSON.parse(localStorage.getItem(LS_KEYS.SHELTERS)||"[]"); }
     function setShelters(a){ localStorage.setItem(LS_KEYS.SHELTERS, JSON.stringify(a)); }
     function getManagers(){ return JSON.parse(localStorage.getItem(LS_KEYS.MANAGERS)||"[]"); }
-    function getMessages(){ return JSON.parse(localStorage.getItem(LS_KEYS.MESSAGES)||"[]"); }
-    function setMessages(a){ localStorage.setItem(LS_KEYS.MESSAGES, JSON.stringify(a)); }
-    function getSOS(){ return JSON.parse(localStorage.getItem(LS_KEYS.SOS)||"[]"); }
-    function setSOS(a){ localStorage.setItem(LS_KEYS.SOS, JSON.stringify(a)); }
+
+    /***********************
+     * FIRESTORE LIVE DATA (Messages + SOS)
+     ***********************/
+    let LIVE_MESSAGES = [];
+    let LIVE_SOS = [];
+    let unsubMsg = null;
+    let unsubSOS = null;
+
+    function startLiveFirestore(){
+      const api = window.firebaseAPI;
+      if (!api) return;
+
+      if (unsubMsg) unsubMsg();
+      if (unsubSOS) unsubSOS();
+
+      const qMsg = api.query(api.collection(api.db, "messages"), api.orderBy("createdAt", "desc"));
+      unsubMsg = api.onSnapshot(qMsg, (snap) => {
+        LIVE_MESSAGES = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
+        renderAll();
+      });
+
+      const qSOS = api.query(api.collection(api.db, "sos"), api.orderBy("createdAt", "desc"));
+      unsubSOS = api.onSnapshot(qSOS, (snap) => {
+        LIVE_SOS = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
+        renderAll();
+      });
+    }
+
+    function stopLiveFirestore(){
+      if (unsubMsg) { unsubMsg(); unsubMsg = null; }
+      if (unsubSOS) { unsubSOS(); unsubSOS = null; }
+    }
 
     /***********************
      * STATUS LOGIC
@@ -558,7 +607,11 @@
      ***********************/
     function getSession(){ return JSON.parse(localStorage.getItem(LS_KEYS.SESSION)||"null"); }
     function setSession(s){ localStorage.setItem(LS_KEYS.SESSION, JSON.stringify(s)); }
-    function logout(){ localStorage.removeItem(LS_KEYS.SESSION); showScreen("login"); }
+    function logout(){
+      stopLiveFirestore();
+      localStorage.removeItem(LS_KEYS.SESSION);
+      showScreen("login");
+    }
 
     function handleLogin(){
       const role=document.getElementById("loginRole").value;
@@ -797,45 +850,49 @@
     }
 
     /***********************
-     * USER: MESSAGE + SOS
+     * USER: MESSAGE + SOS (FIRESTORE)
      ***********************/
     function openMessageModal(){ document.getElementById("modalMsg").classList.remove("hidden"); }
     function closeMessageModal(){ document.getElementById("modalMsg").classList.add("hidden"); document.getElementById("msgText").value=""; }
 
-    function sendMessageToAdmin(){
+    async function sendMessageToAdmin(){
+      const api = window.firebaseAPI;
+      if (!api) return alert("Firebase not ready. Refresh page.");
+
       const sess=getSession();
       const text=(document.getElementById("msgText").value||"").trim();
       if (!text) return alert("Enter a message");
 
-      const msg={
-        id:"MSG_"+Math.random().toString(16).slice(2),
-        fromUser:sess.username,
-        text,
-        shelterId:selectedShelterId||null,
-        time:nowISO(),
-        replyText:null,
-        replyTime:null
-      };
-      const all=getMessages();
-      all.unshift(msg);
-      setMessages(all);
-
-      closeMessageModal();
-      renderAll();
-      alert("Message sent ✅");
+      try{
+        await api.addDoc(api.collection(api.db, "messages"), {
+          fromUser: sess.username,
+          text,
+          shelterId: selectedShelterId || null,
+          time: nowISO(),
+          replyText: null,
+          replyTime: null,
+          createdAt: api.serverTimestamp()
+        });
+        closeMessageModal();
+        alert("Message sent ✅");
+      }catch(e){
+        console.error(e);
+        alert("Message failed. Check Firestore Rules.");
+      }
     }
 
     function renderUserThread(){
       const sess=getSession();
       const box=document.getElementById("userMsgThread");
-      const all=getMessages().filter(m=>m.fromUser===sess.username);
+      const all = LIVE_MESSAGES.filter(m=>m.fromUser===sess.username);
+
       if (all.length===0){ box.innerHTML=`<div class="muted">No messages yet.</div>`; return; }
 
       box.innerHTML = all.map(m=>`
         <div class="item">
-          <div class="muted"><small>${fmtTime(m.time)}</small></div>
-          <div><b>You:</b> ${escapeHTML(m.text)}</div>
-          ${m.replyText ? `<div class="reply"><b>Admin:</b> ${escapeHTML(m.replyText)}<br/><span class="muted"><small>${fmtTime(m.replyTime)}</small></span></div>`
+          <div class="muted"><small>${escapeHTML(m.time || "")}</small></div>
+          <div><b>You:</b> ${escapeHTML(m.text || "")}</div>
+          ${m.replyText ? `<div class="reply"><b>Admin:</b> ${escapeHTML(m.replyText)}<br/><span class="muted"><small>${escapeHTML(m.replyTime || "")}</small></span></div>`
           : `<div class="muted"><small>Waiting for admin reply…</small></div>`}
         </div>
       `).join("");
@@ -844,34 +901,173 @@
     function openSOSModal(){ document.getElementById("modalSOS").classList.remove("hidden"); }
     function closeSOSModal(){ document.getElementById("modalSOS").classList.add("hidden"); document.getElementById("sosMsg").value=""; }
 
-    function sendSOS(){
+    async function sendSOS(){
+      const api = window.firebaseAPI;
+      if (!api) return alert("Firebase not ready. Refresh page.");
+
       const sess=getSession();
       const reason=document.getElementById("sosReason").value;
       const message=(document.getElementById("sosMsg").value||"").trim();
       const ll=getUserLatLng();
 
-      const ticket={
-        id:"SOS_"+Math.random().toString(16).slice(2),
-        fromUser:sess.username,
-        reason, message,
-        lat:ll.lat, lng:ll.lng,
-        status:"Sent",
-        time:nowISO(),
-        adminResponse:null,
-        adminResponseTime:null
-      };
+      try{
+        await api.addDoc(api.collection(api.db, "sos"), {
+          fromUser: sess.username,
+          reason, message,
+          lat: ll.lat, lng: ll.lng,
+          status: "Sent",
+          time: nowISO(),
+          adminResponse: null,
+          adminResponseTime: null,
+          createdAt: api.serverTimestamp()
+        });
 
-      const all=getSOS();
-      all.unshift(ticket);
-      setSOS(all);
-
-      closeSOSModal();
-      renderAll();
-      alert("SOS sent ✅");
+        closeSOSModal();
+        alert("SOS sent ✅");
+      }catch(e){
+        console.error(e);
+        alert("SOS failed. Check Firestore Rules.");
+      }
     }
 
     /***********************
-     * ADMIN
+     * ADMIN: MESSAGES (FIRESTORE)
+     ***********************/
+    function renderAdminMessages(){
+      const box=document.getElementById("adminMessagesList");
+      const shelters=getShelters();
+      const all = LIVE_MESSAGES;
+
+      if (all.length===0){ box.innerHTML=`<div class="muted">No messages yet.</div>`; return; }
+
+      box.innerHTML = all.map(m=>{
+        const sh = m.shelterId ? shelters.find(s=>s.id===m.shelterId) : null;
+        return `
+          <div class="item">
+            <div class="itemHead">
+              <div>
+                <b>${escapeHTML(m.fromUser || "")}</b>
+                <div class="muted"><small>${escapeHTML(m.time || "")}</small></div>
+              </div>
+              <div class="muted">${sh ? "Shelter: "+escapeHTML(sh.name) : ""}</div>
+            </div>
+
+            <div style="margin-top:6px">${escapeHTML(m.text || "")}</div>
+
+            ${m.replyText ? `
+              <div class="reply">
+                <b>Replied:</b> ${escapeHTML(m.replyText)}<br/>
+                <span class="muted"><small>${escapeHTML(m.replyTime || "")}</small></span>
+              </div>
+            ` : `
+              <label style="margin-top:10px">Reply</label>
+              <textarea id="reply_${m.docId}" placeholder="Type reply..."></textarea>
+              <div style="display:flex; justify-content:flex-end; margin-top:8px">
+                <button class="btn primary small" onclick="adminReply('${m.docId}')">Send Reply</button>
+              </div>
+            `}
+          </div>
+        `;
+      }).join("");
+    }
+
+    async function adminReply(docId){
+      const api = window.firebaseAPI;
+      const text=(document.getElementById("reply_"+docId).value||"").trim();
+      if (!text) return alert("Enter reply");
+      try{
+        await api.updateDoc(api.doc(api.db, "messages", docId), {
+          replyText: text,
+          replyTime: nowISO()
+        });
+        alert("Reply sent ✅");
+      }catch(e){
+        console.error(e);
+        alert("Reply failed. Check Firestore Rules.");
+      }
+    }
+
+    /***********************
+     * ADMIN: SOS (FIRESTORE)
+     ***********************/
+    function renderAdminSOS(){
+      const box=document.getElementById("adminSOSList");
+      const all = LIVE_SOS;
+      const openCount=all.filter(x=>x.status!=="Resolved").length;
+      document.getElementById("adminOpenSOS").textContent=openCount;
+
+      if (all.length===0){ box.innerHTML=`<div class="muted">No SOS alerts yet.</div>`; return; }
+
+      box.innerHTML = all.map(t=>`
+        <div class="item">
+          <div class="itemHead">
+            <div>
+              <b>${escapeHTML(t.fromUser || "")}</b> – <span class="muted">${escapeHTML(t.reason || "")}</span>
+              <div class="muted"><small>${escapeHTML(t.time || "")}</small></div>
+            </div>
+            <div class="statusTag ${t.status==="Resolved"?"tagG":(t.status==="Acknowledged"?"tagY":"tagR")}">${escapeHTML(t.status || "")}</div>
+          </div>
+
+          <div style="margin-top:6px">
+            <div class="muted"><small>Location:</small> <span class="mono">${Number(t.lat||0).toFixed(5)}, ${Number(t.lng||0).toFixed(5)}</span></div>
+            <div style="margin-top:6px">${escapeHTML(t.message || "(no message)")}</div>
+          </div>
+
+          ${t.adminResponse ? `
+            <div class="reply">
+              <b>Admin response:</b> ${escapeHTML(t.adminResponse)}<br/>
+              <span class="muted"><small>${escapeHTML(t.adminResponseTime || "")}</small></span>
+            </div>
+          ` : `
+            <label style="margin-top:10px">Respond</label>
+            <textarea id="sosreply_${t.docId}" placeholder="Example: Stay calm. Nearest shelter is Egmore School."></textarea>
+            <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:8px; flex-wrap:wrap">
+              <button class="btn small" onclick="adminAcknowledgeSOS('${t.docId}')">Acknowledge</button>
+              <button class="btn primary small" onclick="adminRespondSOS('${t.docId}')">Send Response</button>
+              <button class="btn good small" onclick="adminResolveSOS('${t.docId}')">Mark Resolved</button>
+            </div>
+          `}
+        </div>
+      `).join("");
+    }
+
+    async function adminAcknowledgeSOS(docId){
+      const api = window.firebaseAPI;
+      try{
+        await api.updateDoc(api.doc(api.db, "sos", docId), { status:"Acknowledged" });
+      }catch(e){
+        console.error(e);
+        alert("Failed. Check Firestore Rules.");
+      }
+    }
+    async function adminRespondSOS(docId){
+      const api = window.firebaseAPI;
+      const text=(document.getElementById("sosreply_"+docId).value||"").trim();
+      if (!text) return alert("Enter SOS response");
+      try{
+        await api.updateDoc(api.doc(api.db, "sos", docId), {
+          adminResponse:text,
+          adminResponseTime: nowISO(),
+          status:"Acknowledged"
+        });
+        alert("SOS response sent ✅");
+      }catch(e){
+        console.error(e);
+        alert("Failed. Check Firestore Rules.");
+      }
+    }
+    async function adminResolveSOS(docId){
+      const api = window.firebaseAPI;
+      try{
+        await api.updateDoc(api.doc(api.db, "sos", docId), { status:"Resolved" });
+      }catch(e){
+        console.error(e);
+        alert("Failed. Check Firestore Rules.");
+      }
+    }
+
+    /***********************
+     * ADMIN: SHELTERS (LOCAL)
      ***********************/
     function opt(current, arr){
       return arr.map(v=>`<option value="${v}" ${v===current?"selected":""}>${v}</option>`).join("");
@@ -992,127 +1188,6 @@
       adminMap.setView([s.lat,s.lng],15);
     }
 
-    function renderAdminMessages(){
-      const box=document.getElementById("adminMessagesList");
-      const shelters=getShelters();
-      const all=getMessages();
-      if (all.length===0){ box.innerHTML=`<div class="muted">No messages yet.</div>`; return; }
-
-      box.innerHTML = all.map(m=>{
-        const sh = m.shelterId ? shelters.find(s=>s.id===m.shelterId) : null;
-        return `
-          <div class="item">
-            <div class="itemHead">
-              <div>
-                <b>${escapeHTML(m.fromUser)}</b>
-                <div class="muted"><small>${fmtTime(m.time)}</small></div>
-              </div>
-              <div class="muted">${sh ? "Shelter: "+escapeHTML(sh.name) : ""}</div>
-            </div>
-
-            <div style="margin-top:6px">${escapeHTML(m.text)}</div>
-
-            ${m.replyText ? `
-              <div class="reply">
-                <b>Replied:</b> ${escapeHTML(m.replyText)}<br/>
-                <span class="muted"><small>${fmtTime(m.replyTime)}</small></span>
-              </div>
-            ` : `
-              <label style="margin-top:10px">Reply</label>
-              <textarea id="reply_${m.id}" placeholder="Type reply..."></textarea>
-              <div style="display:flex; justify-content:flex-end; margin-top:8px">
-                <button class="btn primary small" onclick="adminReply('${m.id}')">Send Reply</button>
-              </div>
-            `}
-          </div>
-        `;
-      }).join("");
-    }
-
-    function adminReply(msgId){
-      const all=getMessages();
-      const msg=all.find(x=>x.id===msgId);
-      if (!msg) return;
-      const text=(document.getElementById("reply_"+msgId).value||"").trim();
-      if (!text) return alert("Enter reply");
-      msg.replyText=text;
-      msg.replyTime=nowISO();
-      setMessages(all);
-      renderAll();
-      alert("Reply sent ✅");
-    }
-
-    function renderAdminSOS(){
-      const box=document.getElementById("adminSOSList");
-      const all=getSOS();
-      const openCount=all.filter(x=>x.status!=="Resolved").length;
-      document.getElementById("adminOpenSOS").textContent=openCount;
-
-      if (all.length===0){ box.innerHTML=`<div class="muted">No SOS alerts yet.</div>`; return; }
-
-      box.innerHTML = all.map(t=>`
-        <div class="item">
-          <div class="itemHead">
-            <div>
-              <b>${escapeHTML(t.fromUser)}</b> – <span class="muted">${escapeHTML(t.reason)}</span>
-              <div class="muted"><small>${fmtTime(t.time)}</small></div>
-            </div>
-            <div class="statusTag ${t.status==="Resolved"?"tagG":(t.status==="Acknowledged"?"tagY":"tagR")}">${t.status}</div>
-          </div>
-
-          <div style="margin-top:6px">
-            <div class="muted"><small>Location:</small> <span class="mono">${t.lat.toFixed(5)}, ${t.lng.toFixed(5)}</span></div>
-            <div style="margin-top:6px">${escapeHTML(t.message || "(no message)")}</div>
-          </div>
-
-          ${t.adminResponse ? `
-            <div class="reply">
-              <b>Admin response:</b> ${escapeHTML(t.adminResponse)}<br/>
-              <span class="muted"><small>${fmtTime(t.adminResponseTime)}</small></span>
-            </div>
-          ` : `
-            <label style="margin-top:10px">Respond</label>
-            <textarea id="sosreply_${t.id}" placeholder="Example: Stay calm. Nearest shelter is Egmore School."></textarea>
-            <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:8px; flex-wrap:wrap">
-              <button class="btn small" onclick="adminAcknowledgeSOS('${t.id}')">Acknowledge</button>
-              <button class="btn primary small" onclick="adminRespondSOS('${t.id}')">Send Response</button>
-              <button class="btn good small" onclick="adminResolveSOS('${t.id}')">Mark Resolved</button>
-            </div>
-          `}
-        </div>
-      `).join("");
-    }
-
-    function adminAcknowledgeSOS(id){
-      const all=getSOS();
-      const t=all.find(x=>x.id===id);
-      if (!t || t.status==="Resolved") return;
-      t.status="Acknowledged";
-      setSOS(all);
-      renderAll();
-    }
-    function adminRespondSOS(id){
-      const all=getSOS();
-      const t=all.find(x=>x.id===id);
-      if (!t) return;
-      const text=(document.getElementById("sosreply_"+id).value||"").trim();
-      if (!text) return alert("Enter SOS response");
-      t.adminResponse=text;
-      t.adminResponseTime=nowISO();
-      if (t.status!=="Resolved") t.status="Acknowledged";
-      setSOS(all);
-      renderAll();
-      alert("SOS response sent ✅");
-    }
-    function adminResolveSOS(id){
-      const all=getSOS();
-      const t=all.find(x=>x.id===id);
-      if (!t) return;
-      t.status="Resolved";
-      setSOS(all);
-      renderAll();
-    }
-
     /***********************
      * MANAGER
      ***********************/
@@ -1186,6 +1261,10 @@
 
       const sess=getSession();
       document.getElementById("whoamiPill").textContent = `${sess.role.toUpperCase()} · ${sess.username}`;
+
+      // Start Firestore only for admin & user (they need live messages)
+      if (sess.role === "admin" || sess.role === "user") startLiveFirestore();
+      else stopLiveFirestore();
 
       if (which==="admin"){
         admin.classList.remove("hidden");
